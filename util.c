@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "util.h"
 
@@ -33,12 +34,12 @@ int parseNumericArg(const char *optarg, uint64_t *val) {
     strncpy(arg, optarg, 255);
     pprintf("arg: %s\n", arg);
 
-    if(arg[0] == '0') {
+    if (arg[0] == '0') {
         char *lead = arg;
         char *trail = arg;
 
-        while( *lead !='\0' ) {
-            if ( *lead != '_' ) {
+        while (*lead !='\0') {
+            if (*lead != '_') {
                 *trail = *lead;
                 trail++;
             }
@@ -54,16 +55,16 @@ int parseNumericArg(const char *optarg, uint64_t *val) {
                 printf("Hex format error\n");
                 return 1;
             }
-            pprintf("val = %llu\n", *val);
+            pprintf("val = %"PRIu64"\n", *val);
             return 0;
-        }else if (len >= 2 && (arg[1] == 'b' || arg[1] == 'B')) {
+        } else if (len >= 2 && (arg[1] == 'b' || arg[1] == 'B')) {
             pprintf("Bin argument\n");
             *val = strtoul(arg+2, &end, 2);
             if (*end != '\0') {
                 printf("Binary format error\n");
                 return 1;
             }
-            pprintf("val = %llu\n", *val);
+            pprintf("val = %"PRIu64"\n", *val);
             return 0;
         }
         pprintf("Octal argument\n");
@@ -73,7 +74,7 @@ int parseNumericArg(const char *optarg, uint64_t *val) {
             printf("Octal format error\n");
             return 1;
         }
-        pprintf("val = %llu\n", *val);
+        pprintf("val = %"PRIu64"\n", *val);
         return 0;
     }
 
@@ -95,16 +96,36 @@ int parseNumericArg(const char *optarg, uint64_t *val) {
             arg[len-1] = '\0';
             break;
     }
-    pprintf("scale = %llu\n", scale);
+    pprintf("scale = %"PRIu64"\n", scale);
     pprintf("arg = %s\n", arg);
 
     *val = strtoul(arg, &end, 10);
     if (*end != '\0') {
-        pprintf("Decimal error\n");
+        printf("Numeric Arg error\n");
         return 1;
     }
     *val *= scale;
 
-    pprintf("val = %llu\n", *val);
+    pprintf("val = %"PRIu64"\n", *val);
     return 0;
+}
+
+char hrBuf[256];
+char* toHRSize(uint64_t size) {
+    hrBuf[0] = '\0';
+    if (size >> 60)
+        snprintf(hrBuf, 256, "%dE", (int)(size >> 60));
+    else if (size >> 50)
+        snprintf(hrBuf, 256, "%dP", (int)(size >> 50));
+    else if (size >> 40)
+        snprintf(hrBuf, 256, "%dT", (int)(size >> 40));
+    else if (size >> 30)
+        snprintf(hrBuf, 256, "%dG", (int)(size >> 30));
+    else if (size >> 20)
+        snprintf(hrBuf, 256, "%dM", (int)(size >> 20));
+    else if (size >> 10)
+        snprintf(hrBuf, 256, "%dK", (int)(size >> 10));
+    else
+        snprintf(hrBuf, 256, "%dB", (int)size);
+    return hrBuf;
 }
