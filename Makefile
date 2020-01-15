@@ -10,21 +10,26 @@ CFLAGS	= $(INCDIRS) $(XFLAGS)
 #Target ALL
 all: sbox
 
+.PHONY: makedirs
+makedirs:
+	@mkdir -p obj 
+
 #compile .c files to .o files
-%.o: %.c
+obj/%.o: %.c makedirs
 	@echo "  CC     `basename $@`"
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 #Clean the outputs
 .PHONY: clean
 clean:
-	@rm -rf *.o
+	@rm -rf obj/*.o
+	@rm sbox
 
 # All dependencies
-SBOX_OBJS = sbox.o
-SBOX_OBJS += util.o
-SBOX_OBJS += memop.o
-SBOX_OBJS += memeater.o
+SBOX_OBJS = obj/sbox.o
+SBOX_OBJS += obj/util.o
+SBOX_OBJS += obj/memop.o
+SBOX_OBJS += obj/memeater.o
 
 sbox: $(SBOX_OBJS)
 	@echo "  CC [B] `basename $@`"

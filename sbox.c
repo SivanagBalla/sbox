@@ -47,10 +47,11 @@ int symlinks_main(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
 
-    char progname[MAXPATHLEN]={0};
+    // char progname[MAXPATHLEN]={0};
+    char *progname;
     int i;
 
-    basename_r(argv[0], progname);
+    progname = basename(argv[0]);
     if (!strncmp(progname, "sbox", sizeof("sbox"))) {
         if (argc == 1) {
             showhelp();
@@ -62,7 +63,6 @@ int main(int argc, char* argv[]) {
         argv = &argv[1];
     }
 
-    basename_r(argv[0], progname);
     /* Run the utility */
     for (i=0; i < utilCount; i++) {
         if (!strncmp(progname, utils[i].utilName, MAX_UTIL_NAME))
