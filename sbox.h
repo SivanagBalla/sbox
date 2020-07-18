@@ -5,12 +5,11 @@
 #ifndef __SBOX_H__
 #define __SBOX_H__
 
-#define MAX_UTIL_NAME 16
+#include "memop.h"
+#include "memeater.h"
+#include "linkedlist.h"
 
-typedef struct {
-    char utilName[MAX_UTIL_NAME];
-    int (*utilMain)(int argc, char* arg[]);
-} utils_t;
+#define MAX_UTIL_NAME 16
 
 int symlinks_main(int argc, char* argv[]);
 

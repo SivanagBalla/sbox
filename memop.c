@@ -11,6 +11,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 
@@ -60,7 +61,7 @@ char* getBinaryStr(uint64_t val, int bitWidth, char *buf) {
 }
 
 int getTermWidth (void) {
-    uint64_t lcols;
+    //uint64_t lcols;
     if (cols) 
         return (int)cols;
     
@@ -78,14 +79,13 @@ void hexdump(char *vptr, uint64_t  offset, uint64_t len, int op_type) {
 
 #define SEPERATOR_WIDTH 2
 #define MAX_COLS 1024
-    uint64_t ind, i, j;
+    uint64_t i, j;
 
     char *sptr = vptr;
-    char *eptr = vptr + len;
 
-    char hline[MAX_COLS];
-    char bline[MAX_COLS];
-    char cline[MAX_COLS];
+    /* char hline[MAX_COLS]; */
+    /* char bline[MAX_COLS]; */
+    /* char cline[MAX_COLS]; */
     char sline[MAX_COLS];
 
     char binstr[256];
@@ -174,9 +174,9 @@ void hexdump(char *vptr, uint64_t  offset, uint64_t len, int op_type) {
         coff = char_loc;
 
         if (huge_offset)
-            sprintf(sline, "%016llx: ", offset + (i*op_type));
+            sprintf(sline, "%016"PRIx64": ", offset + (i*op_type));
         else
-            sprintf(sline, "%08llx: ", offset + (i*op_type));
+            sprintf(sline, "%08"PRIx64": ", offset + (i*op_type));
 
         // Cache the values
         for (j = 0; j < mipl && i < mi; i++, j++) {
@@ -252,7 +252,7 @@ void hexdump(char *vptr, uint64_t  offset, uint64_t len, int op_type) {
         printf("Warning: length is not multiple of %d bytes. Left over %d "\
                     "byte(s) ...\n", op_type, tail_bytes);
         int i = 0;
-        printf("%08llx: ", offset + len);
+        printf("%08"PRIx64": ", offset + len);
         for (sptr = vptr+len;  i < tail_bytes; i++) 
             printf("%02x ", (uint8_t)*(uint8_t*)(sptr+i) );
         printf("\n");
@@ -285,21 +285,21 @@ int memop_main(int argc, char **argv) {
 
             case 'o':
             case 's':
-                if (parseNumericArg(optarg, &offset)) {
+                if (!parseNumericArg(optarg, &offset)) {
                     printf("Unknown format for -s\n");
                     argerr++;
                 }
                 break;
 
             case 'l':
-                if (parseNumericArg(optarg, &len)) {
+                if (!parseNumericArg(optarg, &len)) {
                     printf("Unknown format for -l\n");
                     argerr++;
                 }
                 break;
 
             case 'c':
-                if (parseNumericArg(optarg, &cols)) {
+                if (!parseNumericArg(optarg, &cols)) {
                     printf("Unknown format for -c\n");
                     argerr++;
                 }
@@ -337,7 +337,7 @@ int memop_main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
     dprintf("file : %s\n", filename);
-    dprintf("offset : %llu\n", offset);
+    dprintf("offset : %"PRIu64"\n", offset);
 
     struct stat sb = {0};
     fd = open(filename, O_RDONLY);
@@ -351,7 +351,7 @@ int memop_main(int argc, char **argv) {
         if (fstat(fd, &sb) == -1)
             printf("Warning: Unable to get file size\n");
 
-        dprintf("Filesize: %llu\n", sb.st_size);
+        dprintf("Filesize: %"PRIu64"\n", sb.st_size);
         if (offset >= sb.st_size) {
             printf("Offset is past end of file\n");
             exit(EXIT_FAILURE);
@@ -364,13 +364,13 @@ int memop_main(int argc, char **argv) {
         close(fd);
         exit(EXIT_FAILURE);
     }
-    dprintf("System page size: %lld\n", page_size);
+    dprintf("System page size: %"PRId64"\n", page_size);
 
     uint64_t pa_offset = offset & (~(page_size-1));
     uint64_t poi = (offset-pa_offset);
-    dprintf("Page offset = %llu\n", pa_offset);
-    dprintf("Page offset inside= %llu\n", poi);
-    dprintf("Map length= %llu\n", len);
+    dprintf("Page offset = %"PRIu64"\n", pa_offset);
+    dprintf("Page offset inside= %"PRIu64"\n", poi);
+    dprintf("Map length= %"PRIu64"\n", len);
 
     void *vptr = mmap(NULL, poi+len, PROT_READ, MAP_SHARED, 
                                 fd, pa_offset);
