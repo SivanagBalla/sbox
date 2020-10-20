@@ -24,6 +24,7 @@ utils_t utils[] = {
     { "symlinks",   symlinks_main , ""},
     { "memop",      memop_main    , ""},
     { "memeater",   memeater_main , ""},
+    { "benchmark",  benchmark_main, ""},
     { "hide_lltest",     lltest_main ,   ""},
     { "hide_util",       util_main ,     ""}
 };

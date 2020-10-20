@@ -39,6 +39,7 @@ int memeater_main(int argc, char* argv[]) {
     while (quit == FALSE) {
         buf[0] = '\0';
         printf(">> ");
+        fflush(stdout);
         len = getInput(buf, 1024);
         tokenize(buf, len);
 
@@ -47,20 +48,22 @@ int memeater_main(int argc, char* argv[]) {
         } else if (!strcmp("q", tokens[0])) {
             quit = TRUE;
         } else if (!strcmp("eat", tokens[0])) {
-            uint64_t size, cnt, echo;
+            uint64_t size, cnt, echo, no_acc;
             void *ptr;
             int i;
-            if (tokCnt != 4) {
-                printf("Usage: eat <size> <cnt> <echo>\n");
+            if (tokCnt != 5) {
+                printf("Usage: eat <size> <cnt> <echo> <no_access>\n");
                 continue;
             }
             if(parseNumericArg(tokens[1], &size) == FALSE ||
                     parseNumericArg(tokens[2], &cnt) == FALSE ||
-                    parseNumericArg(tokens[3], &echo) == FALSE) {
-                printf("Parsing error: Usage: eat <size> <cnt> <echo>\n");
+                    parseNumericArg(tokens[3], &echo) == FALSE ||
+                    parseNumericArg(tokens[4], &no_acc) == FALSE) {
+                printf("Parsing error: Usage: eat <size> <cnt> <echo> <no_access>\n");
                 continue;
             }
-            printf("Eating %"PRId64" byte chunks %"PRId64" times\n", size, cnt);
+            printf("Eating %"PRId64" byte chunks %"PRId64" times%s\n", size, cnt,
+                    no_acc ? " without accessing" : "");
             sbrk_c = 0;
             mmap_c = 0;
             for(i=0; i < cnt; i++) {
@@ -70,7 +73,8 @@ int memeater_main(int argc, char* argv[]) {
                     printf("Alloc failed\n");
                     break;
                 }
-                memset(ptr, 123, size); 
+                if(!no_acc)
+                    memset(ptr, 123, size); 
 
                 cur_brk_pos = sbrk(0);
                 if ( ptr < cur_brk_pos) {
@@ -93,10 +97,13 @@ int memeater_main(int argc, char* argv[]) {
                     sbrk_c, sbrk_t, mmap_c, mmap_t);
             printf("================\n");
         } else if (!strcmp("system", tokens[0])) {
+            int retCode = 0;
             if (tokCnt < 2 ) {
                 printf("Usage: system <cmd>\n");
                 continue;
             }
+            retCode = system(tokens[1]);
+            printf("retCode = %d\n", retCode);
         } else if (!strcmp("open", tokens[0])) {
             int flags;
 

@@ -4,7 +4,7 @@
 
 INCDIRS = 
 LIBS	=
-XFLAGS	= -Wall
+XFLAGS	= -Wall -static
 CFLAGS	= $(INCDIRS) $(XFLAGS)
 
 #Target ALL
@@ -31,6 +31,7 @@ SBOX_OBJS += obj/util.o
 SBOX_OBJS += obj/linkedlist.o
 SBOX_OBJS += obj/memop.o
 SBOX_OBJS += obj/memeater.o
+SBOX_OBJS += obj/benchmark.o
 sbox: $(SBOX_OBJS)
 	@echo "  CC [B] `basename $@`"
 	@$(CC) $(CFLAGS) $(SBOX_OBJS) $(LIBS) -o sbox
@@ -58,3 +59,10 @@ util: $(UTIL_OBJS) obj/genmain.o
 	@echo "  CC [B] `basename $@`"
 	@$(CC) $(CFLAGS) $(UTIL_OBJS) $(LIBS) -o utils
 
+BENCHMARK_OBJS = obj/benchmark.o
+BENCHMARK_OBJS += obj/util.o
+BENCHMARK_OBJS += obj/genmain.o
+benchmark: CFLAGS += -DUTIL=benchmark_main
+benchmark: $(BENCHMARK_OBJS) obj/genmain.o
+	@echo "  CC [B] `basename $@`"
+	@$(CC) $(CFLAGS) $(BENCHMARK_OBJS) $(LIBS) -o benchmark

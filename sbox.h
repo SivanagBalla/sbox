@@ -8,6 +8,7 @@
 #include "memop.h"
 #include "memeater.h"
 #include "linkedlist.h"
+#include "benchmark.h"
 
 #define MAX_UTIL_NAME 16
 
